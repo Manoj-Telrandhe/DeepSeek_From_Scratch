@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class MultiQueryAttentionKV(nn.Module):
-  def __init__(self, d_in, d_out, num_heads, dropout=0.0):
+  def __init__(self, d_in, d_out, context_length, num_heads, dropout=0.0, qkv_bias=False):
     super().__init__()
     assert d_out % num_heads == 0, "d_model must be divisible by num_heads"
 
@@ -53,9 +53,9 @@ class MultiQueryAttentionKV(nn.Module):
       else:
         self.cache_k = torch.cat([self.cache_k, keys_new], dim=2)   # dim = 2, concatenate across num tokens
         self.cache_v = torch.cat([self.cache_v, values_new], dim=2)
-      keys_base, values_base = self.cache_k, self.cache_v
+      keys, values = self.cache_k, self.cache_v
     else:
-      keys_base, values_base = keys_new, values_new
+      keys, values = keys_new, values_new
 
 
     # Now Repeat K and V to match the query head
@@ -77,6 +77,9 @@ class MultiQueryAttentionKV(nn.Module):
       self.ptr_current_pos = 0
     k_positions = torch.arange(num_tokens_K, device=device, dtype=torch.long)
     mask = q_positions.unsqueeze(-1) < k_positions.unsqueeze(0)
+    
+    # Use the mask to fill attention scores
+    attn_scores = attn_scores.masked_fill(mask, -torch.inf)
 
     # Attn weights
     attn_weights = torch.softmax(attn_scores / (keys.shape[-1]**0.5), dim=-1)

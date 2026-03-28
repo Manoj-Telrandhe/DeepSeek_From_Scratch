@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn      
 
 class MultiQueryAttention(nn.Module):
-  def __init__(self, d_in, d_out, num_heads, dropout=0.0):
+  def __init__(self, d_in, d_out, context_length, num_heads, dropout=0.0, qkv_bias=False):
     super().__init__()
     assert d_out % num_heads == 0, "d_model must be divisible by num_heads"
 

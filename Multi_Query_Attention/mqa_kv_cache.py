@@ -51,7 +51,7 @@ class MultiQueryAttentionKV(nn.Module):
       if self.cache_k is None:
         self.cache_k, self.cache_v = keys_new, values_new
       else:
-        self.cache_k = torch.cat([self.cache_k, keys_new], dim=2)
+        self.cache_k = torch.cat([self.cache_k, keys_new], dim=2)   # dim = 2, concatenate across num tokens
         self.cache_v = torch.cat([self.cache_v, values_new], dim=2)
       keys_base, values_base = self.cache_k, self.cache_v
     else:

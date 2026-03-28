@@ -1,7 +1,7 @@
-import torch     
-import torch.nn as nn      
+import torch
+import torch.nn as nn
 
-class MultiQueryAttention(nn.Module):
+class MultiQueryAttentionKV(nn.Module):
   def __init__(self, d_in, d_out, num_heads, dropout=0.0):
     super().__init__()
     assert d_out % num_heads == 0, "d_model must be divisible by num_heads"
@@ -18,10 +18,12 @@ class MultiQueryAttention(nn.Module):
 
     self.dropout = nn.Dropout(dropout)
 
-    # Using a fixed size mask for demonstration. A dynamic one is better in practice.
-    self.register_buffer("mask", torch.triu(torch.ones(1, 1, 1024, 1024), diagonal=1))
+    self.register_buffer("cache_k", None, persistent=False)
+    self.register_buffer("cache_v", None, persistent=False)
+    self.ptr_current_pos = 0
+    
 
-  def forward(self, x):
+  def forward(self, x, use_cache=False):
     batch_size, num_tokens, d_in =  x.shape
 
     # Query
@@ -41,8 +43,20 @@ class MultiQueryAttention(nn.Module):
     values = values.view(batch_size, num_tokens, 1, self.head_dim)  # only 1 head
 
     # Transpose: (batch_size, num_tokens, 1, head_dim) -> (batch_size, 1, num_tokens, head_dim)
-    keys = keys.transpose(1, 2)
-    values = values.transpose(1, 2)
+    keys_new = keys.transpose(1, 2)
+    values_new = values.transpose(1, 2)
+    
+    # K-V cache
+    if use_cache:
+      if self.cache_k is None:
+        self.cache_k, self.cache_v = keys_new, values_new
+      else:
+        self.cache_k = torch.cat([self.cache_k, keys_new], dim=2)
+        self.cache_v = torch.cat([self.cache_v, values_new], dim=2)
+      keys_base, values_base = self.cache_k, self.cache_v
+    else:
+      keys_base, values_base = keys_new, values_new
+
 
     # Now Repeat K and V to match the query head
     keys = keys.repeat(1, self.num_heads, 1, 1)  # (batch_size, num_heads, num_tokens, head_dim)
@@ -52,10 +66,17 @@ class MultiQueryAttention(nn.Module):
     attn_scores = queries @ keys.transpose(2, 3)
 
     # Apply causal mask
-    # Original mask truncated to the number of tokens and converted to boolean
-    mask_bool = self.mask.bool()[:,:,:num_tokens,:num_tokens]
-    # Use the mask to fill attention scores
-    attn_scores = attn_scores.masked_fill_(mask_bool, -torch.inf)
+    num_tokens_Q = queries.shape[-2]
+    num_tokens_K = keys.shape[-2]
+    device = queries.device
+    if use_cache:
+      q_positions = torch.arange(self.ptr_current_pos, self.ptr_current_pos + num_tokens_Q, device=device, dtype=torch.long)
+      self.ptr_current_pos += num_tokens_Q
+    else:
+      q_positions = torch.arange(num_tokens_Q, device=device, dtype=torch.long)
+      self.ptr_current_pos = 0
+    k_positions = torch.arange(num_tokens_K, device=device, dtype=torch.long)
+    mask = q_positions.unsqueeze(-1) < k_positions.unsqueeze(0)
 
     # Attn weights
     attn_weights = torch.softmax(attn_scores / (keys.shape[-1]**0.5), dim=-1)
@@ -76,3 +97,7 @@ class MultiQueryAttention(nn.Module):
     context_vector = self.out_proj(context_vector)
 
     return context_vector
+    
+  def reset_cache(self):
+    self.cache_k, self.cache_v = None, None
+    self.ptr_current_pos = 0

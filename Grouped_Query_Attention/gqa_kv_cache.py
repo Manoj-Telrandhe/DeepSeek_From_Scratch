@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 class GroupedQueryAttentionKV(nn.Module):
-  def __init__(self, d_in, d_out, num_heads, num_groups, dropout=0.0, max_seq_len: int = 1024):
+  def __init__(self, d_in, d_out, context_length, num_heads, num_groups, dropout=0.0, qkv_bias=False):
     super().__init__()
     assert d_out % num_heads == 0, "d_out must be divide by num_heads"
     assert num_heads % num_groups == 0, "num_heads must be divisible by num_groups"
@@ -57,7 +57,7 @@ class GroupedQueryAttentionKV(nn.Module):
       keys, values = keys_new, values_new
     ############
 
-    heads_per_group = self.num_heads // self.num_groups
+    # heads_per_group = self.num_heads // self.num_groups
 
     # add number of heads in each group K and V to match the query
     keys = keys.repeat_interleave(self.heads_per_group, dim=1)   # (b, num_head, num_tokens, head_dim)

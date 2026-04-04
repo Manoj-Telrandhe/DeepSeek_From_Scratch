@@ -4,10 +4,11 @@ A complete **from-scratch implementation of modern attention mechanisms inspired
 
 This repository covers multiple advanced transformer optimizations including:
 - Multi-Head Attention (MHA)
+- KV Cache optimization
 - Multi-Query Attention (MQA)
 - Grouped-Query Attention (GQA)
 - Multi-Head Latent Attention (MLA)
-- KV Cache optimization
+- Rotary Positional Encoding (RoPE)
 - Mixture of Experts (MoE)
 
 ---

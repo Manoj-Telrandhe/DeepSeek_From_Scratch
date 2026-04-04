@@ -10,7 +10,9 @@ This repository covers multiple advanced transformer optimizations including:
 - Rotary Positional Encoding (RoPE)
 - Mixture of Experts (MoE)
 
----
+
+This project is inspired by concepts from the *“DeepSeek from Scratch”* book, implemented independently to deepen practical understanding.
+
 
 ## 📌 Project Motivation
 

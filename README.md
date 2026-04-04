@@ -1,6 +1,8 @@
 # 🚀 DeepSeek From Scratch
 
-A complete **from-scratch implementation of modern attention mechanisms inspired by DeepSeek architecture**, built for learning, experimentation, and research purposes.
+This repository provides a modular **from-scratch implementation of modern attention variants inspired by DeepSeek architecture**, built for learning, experimentation, and research purposes.
+
+A comprehensive **from-scratch implementation of modern LLMs components inspired by DeepSeek**, it covers attention variants, KV cache optimization, Rotary Positional Encoding (RoPE), Mixture of Experts (MoE), and inference-focused improvements used in scalable LLM systems.
 
 This repository covers multiple advanced transformer optimizations including:
 - Multi-Head Attention (MHA)

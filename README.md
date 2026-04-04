@@ -23,4 +23,31 @@ This project is an effort to **understand and implement these techniques from sc
 
 ---
 
-## 📂 Repository Structure
+## 🧠 Implemented Components
+
+This project focuses on building core transformer components and optimizations from scratch, commonly used in modern large language models.
+
+### 🔹 Attention Mechanisms
+- Multi-Head Attention (MHA)
+- Multi-Query Attention (MQA)
+- Grouped-Query Attention (GQA)
+- Multi-Head Latent Attention (MLA)
+
+### 🔹 Inference Optimizations
+- KV Cache for efficient autoregressive decoding
+- Reduced redundant computation during generation
+
+### 🔹 Positional Encoding
+- Rotary Positional Encoding (RoPE)
+
+### 🔹 Advanced Architectures
+- Mixture of Experts (MoE)
+
+### 🔹 Experimental Notebooks
+- Step-by-step exploration of attention outputs
+- KV cache behavior analysis
+- Token-level decoding experiments
+
+---
+
+## Future Improvements

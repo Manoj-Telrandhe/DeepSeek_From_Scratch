@@ -53,3 +53,7 @@ This project focuses on building core transformer components and optimizations f
 ---
 
 ## Future Improvements
+
+- Integration of quantization techniques to further optimize model efficiency (to be added).
+- Development of a complete training pipeline, including training and evaluation loops.
+- Building an end-to-end integrated pipeline combining all implemented components.
